@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+     KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="format-detection" content="telephone=no" />
+        <!-- WARNING: for iOS 7, remove the width=device-width and height=device-height attributes. See https://issues.apache.org/jira/browse/CB-4323 -->
+        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
+        <link rel="stylesheet" type="text/css" href="css/index.css" />                
+        <title>First App</title>
+    </head>
+    <body>
+        
+        <!--script type="text/javascript" src="cordova.js"></script-->
+        <script type="text/javascript" src="js/index.js"></script>
+        <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.2/jquery.mobile-1.4.2.min.css" />
+		<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+		<script src="http://code.jquery.com/mobile/1.4.2/jquery.mobile-1.4.2.min.js"></script>                
+        <script type="text/javascript">
+
+           
+            localStorage.setItem("Estado", "Novo");
+
+            var tbLogins = localStorage.getItem("Dados");
+            tbLogins = $.parseJSON(tbLogins);
+            if (tbLogins == null) 
+                tbLogins = [];
+          
+            
+
+            function submitForm() {
+                var email = $("#txtEmail").val()
+                var senha = $("#txtSenha").val();
+
+                if (localStorage.getItem("Estado")) {
+                    var alt = localStorage.getItem("Estado");
+
+                    if (alt == "Alt") {
+                        
+                        $.each(tbLogins, function () {
+                            if (this.Email == $("#hdnAlt").val()) {
+                                this.Email = email;
+                            }                            
+                        });
+                        
+                        localStorage.setItem("Dados", JSON.stringify(tbLogins));                        
+                    }
+                    else {
+                        tbLogins.push({ "Email": email, "Senha": senha });
+                        window.localStorage.setItem("Dados", JSON.stringify(tbLogins));
+                    }
+                }
+
+                $.mobile.changePage("#pagLista", { reverse: false, transition: "slide" });
+                var lista = $.parseJSON(localStorage.getItem("Dados"));
+
+                $('#listLogins').empty();
+
+                $.each(lista, function () {
+                    $("#listLogins").append("<li><a href='#' onclick=\"alterar('" + this.Email + "', '" + this.Senha + "');\">" + this.Email + "</li>");
+                });
+
+                $("#listLogins").listview("refresh");
+
+                return false;
+            }
+
+            function alterar(email, senha) {
+                $.mobile.changePage("#pagCadastro", { reverse: false, transition: "slide" });
+
+                $("#txtEmail").val('');
+                $("#txtSenha").val('');
+                $("#txtEmail").val(email);
+                $("#txtSenha").val(senha);
+                $("#hdnAlt").val(email);
+
+                localStorage.setItem("Estado", "Alt");
+            }
+
+            function novo() {
+                $.mobile.changePage("#pagCadastro", { reverse: false, transition: "slide" });
+
+                $("#txtEmail").val('');
+                $("#txtSenha").val('');
+                $("#hdnAlt").val('');
+
+                localStorage.setItem("Estado", "Novo");
+            }
+
+            function remover() {
+                localStorage.setItem("Estado", "Novo");
+                tbLogins = [];
+                window.localStorage.setItem("Dados", JSON.stringify(tbLogins));
+                
+                $('#listLogins').empty();
+                $("#listLogins").listview("refresh");
+            }  
+            
+        </script>
+        
+        <div data-role="page" id="pagCadastro">
+        	<div data-role="header">
+        		<h1>First App - Login</h1>                
+        	</div>
+        	<div data-role="content">
+        		<form method="POST" onSubmit="return submitForm()" data-ajax="false">
+        			<label for="text-basic">Email:</label>
+					<input id="txtEmail" value="" type="email" required placeholder="email@domain.com">
+					<label for="text-basic">Senha:</label>
+					<input id="txtSenha" value="" required minlength="4" autocomplete="off" type="password">        			
+        			<fieldset class="ui-grid-a">
+        				<div class="ui-block-a"><input value="Salvar" data-theme="a" type="submit"></div>
+    					<div class="ui-block-b"><input value="Cancelar" data-theme="b" type="reset"></div>
+        			</fieldset>
+        		</form>
+        	</div>
+        </div>
+        
+        <div data-role="page" id="pagLista">
+        	<div data-role="header">
+        		<h1>First App - Logins Cadastrados</h1>
+        	</div>
+        	<div data-role="content">
+        		<fieldset class="ui-grid-a">
+       				<div class="ui-block-a"><input value="Novo" data-theme="a" type="button" onclick="novo();"></div>   					
+                    <div class="ui-block-b"><input value="Remover Todos" data-theme="b" type="button" onclick="remover();"></div>   					
+       			</fieldset>
+       			<br />
+        		<ul data-role="listview" id="listLogins">
+				    
+				</ul>
+                <input type="hidden" id="hdnAlt">
+        	</div>
+        </div>
+        
+    </body>
+</html>
